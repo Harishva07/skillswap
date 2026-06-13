@@ -7,7 +7,6 @@
 const db = require('../config/db');
 const { getSemanticSimilarity, getLearningPath, getGraphSuggestions, suggestCategory } = require('./skillGraphService');
 
-// Initialize OpenAI client (only if API key exists)
 let openaiClient = null;
 const initOpenAI = () => {
   if (openaiClient) return openaiClient;

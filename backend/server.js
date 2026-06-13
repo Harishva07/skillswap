@@ -30,7 +30,9 @@ const server = http.createServer(app);
 // Socket.io for real-time messaging
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+      callback(null, true);
+    },
     methods: ['GET', 'POST'],
     credentials: true
   }
@@ -171,7 +173,10 @@ app.set('connectedUsers', connectedUsers);
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    // Allow all origins
+    callback(null, true);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
