@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { aiAPI } from '../../services/api';
 import { LoadingSpinner } from '../common/LoadingSpinner';
 
 const CATEGORY_ICONS = {
@@ -36,15 +37,7 @@ export function LearningPath({ skillName, skillId, onAddSkill, onClose }) {
     setLoading(true);
     setError(null);
 
-    const token = localStorage.getItem('token');
-    const params = new URLSearchParams();
-    if (skillName) params.set('skill', skillName);
-    if (skillId) params.set('skillId', skillId);
-
-    fetch(`/api/ai/learning-path?${params}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => r.json())
+    aiAPI.getLearningPath(skillName, skillId)
       .then(data => {
         if (data.success) {
           setPath(data.learningPath || []);

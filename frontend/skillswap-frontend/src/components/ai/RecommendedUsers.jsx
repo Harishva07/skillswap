@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { aiAPI } from '../../services/api';
 import { LoadingSpinner } from '../common/LoadingSpinner';
 import { UserAvatar, Stars } from '../common/Utils';
 
@@ -18,15 +19,11 @@ export function RecommendedUsers() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    fetch('/api/ai/recommendations', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) {
-          setRecommendations(data.recommendations || []);
-          setMessage(data.message || null);
+    aiAPI.getRecommendations()
+      .then(res => {
+        if (res.data.success) {
+          setRecommendations(res.data.recommendations || []);
+          setMessage(res.data.message || null);
         }
       })
       .catch(() => {})
