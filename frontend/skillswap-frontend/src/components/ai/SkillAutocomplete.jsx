@@ -4,18 +4,30 @@
  * Features: debounced search, keyboard navigation, loading states, category badges.
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { aiAPI } from '../../services/api';
 import { LoadingSpinner } from '../common/LoadingSpinner';
 
-// AI API call
-const fetchSuggestions = async (query) => {
-  const token = localStorage.getItem('token');
-  const res = await fetch(`/api/ai/skills/autocomplete?q=${encodeURIComponent(query)}&limit=8`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const data = await res.json();
-  return data.suggestions || [];
-};
+// Debounce helper
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
+
+// Simulated API call (replace with your actual API endpoint)
+async function fetchSuggestions(query) {
+  try {
+    const res = await aiAPI.autocomplete(query, 8);
+    return res.data.data || [];
+  } catch (error) {
+    console.error('Autocomplete error:', error);
+    return [];
+  }
+}
 
 // Category colors map
 const CATEGORY_COLORS = {
