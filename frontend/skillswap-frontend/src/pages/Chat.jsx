@@ -47,7 +47,7 @@ export const Chat = () => {
 
   // ── Socket.io setup ─────────────────────────────────────────────────────────
   useEffect(() => {
-    socket = io('http://localhost:5000', { auth: { token: localStorage.getItem('token') } });
+    socket = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000', { auth: { token: localStorage.getItem('token') } });
     socket.emit('register', user.id);
 
     // Incoming message
