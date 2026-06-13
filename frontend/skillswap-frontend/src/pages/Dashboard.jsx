@@ -509,14 +509,7 @@ export const Dashboard = () => {
       </div>
 
       {/* ── Stat Cards ──────────────────────────────────────────────────────── */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(5, 1fr)',
-          gap: 16,
-          marginBottom: 28,
-        }}
-      >
+      <div className="grid-5" style={{ marginBottom: 28 }}>
         {statCards.map((s) => (
           <StatCard key={s.label} {...s} />
         ))}
@@ -533,13 +526,7 @@ export const Dashboard = () => {
             <div className="card-subtitle">Jump right into what matters</div>
           </div>
         </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 14,
-          }}
-        >
+        <div className="grid-3">
           <QuickAction
             icon="🔍"
             label="Browse Skills"

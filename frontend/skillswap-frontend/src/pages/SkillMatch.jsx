@@ -632,7 +632,7 @@ export const SkillMatch = () => {
                     <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Strong Matches</h2>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>≥ 70% compatibility</span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.1rem' }}>
+                  <div className="responsive-grid-matches">
                     {processedMatches
                       .filter(m => (m.match_percentage || 0) >= 70)
                       .map(match => (
@@ -653,7 +653,7 @@ export const SkillMatch = () => {
                     <span style={{ fontSize: '1.1rem' }}>💡</span>
                     <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Other Potential Matches</h2>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.1rem' }}>
+                  <div className="responsive-grid-matches">
                     {processedMatches
                       .filter(m => (m.match_percentage || 0) < 70)
                       .map(match => (

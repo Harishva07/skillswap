@@ -573,14 +573,7 @@ export const SkillSearch = () => {
           <button className="btn btn-outline" onClick={handleClearFilters}>Clear Filters</button>
         </div>
       ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))',
-            gap: '1.1rem',
-            marginBottom: '2rem',
-          }}
-        >
+        <div className="responsive-grid-search" style={{ marginBottom: '2rem' }}>
           {skills.map(skill => (
             <SkillCard
               key={skill.id}

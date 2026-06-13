@@ -1353,6 +1353,12 @@ tr:hover td { background: var(--bg-secondary); }
 /* =============================================
    GRID LAYOUTS
    ============================================= */
+.grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+
 .grid-4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1573,11 +1579,11 @@ tr:hover td { background: var(--bg-secondary); }
    RESPONSIVE
    ============================================= */
 @media (max-width: 1200px) {
-  .grid-4 { grid-template-columns: repeat(3, 1fr); }
+  .grid-5, .grid-4 { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 900px) {
-  .grid-4, .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .grid-5, .grid-4, .grid-3 { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
@@ -1586,7 +1592,7 @@ tr:hover td { background: var(--bg-secondary); }
   .sidebar { transform: translateX(-100%); }
   .sidebar.mobile-open { transform: translateX(0); width: 260px; }
   
-  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  .grid-5, .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; gap: 16px; }
   .page-content { padding: 16px; }
   
   .landing-nav { padding: 16px 20px; }
@@ -2189,7 +2195,7 @@ tr:hover td { background: var(--bg-secondary); }
   }
 
   /* Grid collapsing */
-  .grid-4, .grid-3, .grid-2 {
+  .grid-5, .grid-4, .grid-3, .grid-2 {
     grid-template-columns: 1fr;
     gap: 16px;
   }
@@ -2239,4 +2245,17 @@ tr:hover td { background: var(--bg-secondary); }
     align-items: center;
     text-align: center;
   }
+}
+
+/* Specific Responsive Classes for Grids */
+.responsive-grid-matches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 1.1rem;
+}
+
+.responsive-grid-search {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  gap: 1.1rem;
 }
