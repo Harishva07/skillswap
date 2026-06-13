@@ -22,7 +22,7 @@ function useDebounce(value, delay) {
 async function fetchSuggestions(query) {
   try {
     const res = await aiAPI.autocomplete(query, 8);
-    return res.data.data || [];
+    return res.data.suggestions || [];
   } catch (error) {
     console.error('Autocomplete error:', error);
     return [];
