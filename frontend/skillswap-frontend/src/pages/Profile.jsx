@@ -107,7 +107,7 @@ export const Profile = () => {
   const [addModalOpen, setAddModalOpen]   = useState(false);
   const [addType, setAddType]             = useState('offered');
   const [skillSearch, setSkillSearch]     = useState('');
-  const [selectedSkill, setSelectedSkill] = useState(null);
+  const [selectedSkills, setSelectedSkills] = useState([]);
   const [addingSkillId, setAddingSkillId] = useState(null);
   const [removingSkillId, setRemovingSkillId] = useState(null);
 
@@ -234,46 +234,50 @@ export const Profile = () => {
       setReviewSubmitting(false);
     }
   };
+  // ── Add skills ─────────────────────────────────────────────────────────────────────────
+  const handleAddSkills = async () => {
+    let skillsToProcess = [...selectedSkills];
+    
+    // Auto-include the typed text if they didn't explicitly pick it from the dropdown
+    if (skillSearch.trim().length >= 2) {
+      const typedSkill = skillSearch.trim();
+      if (!skillsToProcess.find(s => s.name.toLowerCase() === typedSkill.toLowerCase())) {
+        skillsToProcess.push({ name: typedSkill, id: null, _id: null });
+      }
+    }
 
+    if (skillsToProcess.length === 0) return;
 
-  // ── Add skill ──────────────────────────────────────────────────────────────────────────
-  const handleAddSkill = async (skill) => {
-    setAddingSkillId(skill._id || skill.id || 'new');
+    setAddingSkillId('multiple');
     try {
-      let skillId = skill._id || skill.id;
-
-      // If no ID, resolve via find-or-create on the backend
-      if (!skillId) {
-        const createRes = await skillsAPI.create({
-          name: skill.name.trim(),
-          category: skill.category || 'Technology',
-          description: '',
-        });
-        skillId = createRes.data?.skill?.id || createRes.data?.id;
-        if (!skillId) {
-          toast('Could not resolve skill. Please try again.', 'error');
-          return;
+      let addedCount = 0;
+      for (const skill of skillsToProcess) {
+        let skillId = skill._id || skill.id;
+        try {
+          if (!skillId) {
+            const createRes = await userAPI.createSkill({ name: skill.name });
+            skillId = createRes.data.skill.id;
+          }
+          await userAPI.addSkill({ skill_id: skillId, type: addType });
+          addedCount++;
+        } catch (e) {
+          // Ignore if already added
         }
       }
 
-      await userAPI.addSkill({ skill_id: skillId, type: addType });
-      await fetchMySkills();
-      toast(`"${skill.name}" added to ${addType} skills ✅`, 'success');
-      setAddModalOpen(false);
-      setSkillSearch('');
-      setSelectedSkill(null);
-      setLearningPath({ skillName: skill.name, skillId });
-      setShowLearningPath(true);
-    } catch (err) {
-      const msg = err.response?.data?.message || 'Failed to add skill';
-      if (msg.toLowerCase().includes('already')) {
-        toast(`"${skill.name}" is already in your ${addType} skills.`, 'warning');
-        setAddModalOpen(false);
-        setSkillSearch('');
-        setSelectedSkill(null);
+      if (addedCount > 0) {
+        toast(`Successfully added ${addedCount} skill(s) ✅`, 'success');
       } else {
-        toast(msg, 'error');
+        toast('Skills were already on your profile.', 'warning');
       }
+
+      setAddModalOpen(false);
+      setSelectedSkills([]);
+      setSkillSearch('');
+      fetchMySkills();
+    } catch (err) {
+      console.error(err);
+      toast('Failed to add some skills.', 'error');
     } finally {
       setAddingSkillId(null);
     }
@@ -451,6 +455,7 @@ export const Profile = () => {
               onClick={() => {
                 setAddType(activeTab);
                 setSkillSearch('');
+                setSelectedSkills([]);
                 setAddModalOpen(true);
               }}
             >
@@ -521,7 +526,7 @@ export const Profile = () => {
             </p>
             <button
               className="btn btn-primary btn-sm"
-              onClick={() => { setAddType(activeTab); setSkillSearch(''); setAddModalOpen(true); }}
+              onClick={() => { setAddType(activeTab); setSkillSearch(''); setSelectedSkills([]); setAddModalOpen(true); }}
             >
               ＋ Add {activeTab === 'offered' ? 'Offered' : 'Wanted'} Skill
             </button>
@@ -571,8 +576,20 @@ export const Profile = () => {
         <LearningPath
           skillName={learningPath.skillName}
           skillId={learningPath.skillId}
-          onAddSkill={(item) => {
-            handleAddSkill({ id: item.id || null, _id: null, name: item.name, category: item.category });
+          onAddSkill={async (item) => {
+            // Keep support for adding from learning path
+            try {
+              let skillId = item.id;
+              if (!skillId) {
+                const createRes = await userAPI.createSkill({ name: item.name });
+                skillId = createRes.data.skill.id;
+              }
+              await userAPI.addSkill({ skill_id: skillId, type: addType });
+              toast(`"${item.name}" added to ${addType} skills ✅`, 'success');
+              fetchProfileData();
+            } catch(e) {
+              toast('Failed to add skill', 'error');
+            }
           }}
           onClose={() => setShowLearningPath(false)}
         />
@@ -627,7 +644,7 @@ export const Profile = () => {
       {/* ── Add Skill Modal ───────────────────────────────────────────────── */}
       <Modal
         isOpen={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
+        onClose={() => { setAddModalOpen(false); setSelectedSkills([]); setSkillSearch(''); }}
         title={`Add ${addType === 'offered' ? '🎓 Offered' : '🌱 Wanted'} Skill`}
         size="md"
       >
@@ -652,67 +669,52 @@ export const Profile = () => {
           </label>
           <SkillAutocomplete
             value={skillSearch}
-            onChange={(val) => {
-              setSkillSearch(val);
-              setSelectedSkill(null);
-            }}
+            onChange={(val) => setSkillSearch(val)}
             onSelect={(skill) => {
-              setSkillSearch(skill.name);
-              setSelectedSkill(skill);
+              if (!selectedSkills.find(s => s.name.toLowerCase() === skill.name.toLowerCase())) {
+                setSelectedSkills([...selectedSkills, skill]);
+              }
+              setSkillSearch(''); // Clear search box after selection
             }}
             placeholder="Type to search (e.g. React, Guitar, Spanish...)"
           />
         </div>
 
-        {/* Selected skill preview + Add button */}
-        {selectedSkill && (
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '10px 14px', background: 'var(--primary-50)',
-            border: '1.5px solid var(--primary-200)', borderRadius: 'var(--radius)', marginBottom: 12,
-          }}>
-            <div>
-              <p style={{ fontWeight: 700, fontSize: 14, margin: 0 }}>{selectedSkill.name}</p>
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
-                {selectedSkill.category} {selectedSkill.source === 'ai' ? '· ✨ AI suggestion' : '· In database'}
-              </p>
-            </div>
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={() => handleAddSkill(selectedSkill)}
-              disabled={!!addingSkillId}
-            >
-              {addingSkillId ? '⏳ Adding...' : '＋ Add'}
-            </button>
+        {/* Selected skills list (Pills) */}
+        {selectedSkills.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+            {selectedSkills.map((s, i) => (
+              <span key={i} style={{
+                background: 'var(--primary-100)', color: 'var(--primary-700)',
+                padding: '4px 10px', borderRadius: 16, fontSize: 13, fontWeight: 500,
+                display: 'flex', alignItems: 'center', gap: 6,
+                border: '1px solid var(--primary-200)'
+              }}>
+                {s.name}
+                <button 
+                  onClick={() => setSelectedSkills(selectedSkills.filter(sk => sk.name !== s.name))}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, fontSize: 16, lineHeight: 1 }}
+                >×</button>
+              </span>
+            ))}
           </div>
         )}
 
-        {/* Manual add: show when user typed something but didn't pick from dropdown */}
-        {skillSearch.trim().length >= 2 && !selectedSkill && (
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '10px 14px',
-            background: 'var(--bg-secondary)',
-            border: '1.5px dashed var(--border)',
-            borderRadius: 'var(--radius)', marginBottom: 12,
-          }}>
-            <div>
-              <p style={{ fontWeight: 600, fontSize: 14, margin: 0, color: 'var(--text-primary)' }}>
-                ＋ Add "<strong>{skillSearch.trim()}</strong>"
-              </p>
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
-                Manually add this skill to your profile
-              </p>
-            </div>
-            <button
-              className="btn btn-outline btn-sm"
-              onClick={() => handleAddSkill({ name: skillSearch.trim(), id: null, _id: null })}
-              disabled={!!addingSkillId}
-            >
-              {addingSkillId ? '⏳' : '＋ Add'}
-            </button>
-          </div>
+        {/* Manual add info text if user is typing something not yet selected */}
+        {skillSearch.trim().length >= 2 && !selectedSkills.find(s => s.name.toLowerCase() === skillSearch.trim().toLowerCase()) && (
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: -4, marginBottom: 16 }}>
+            Press <strong>Add Skills</strong> below to add "{skillSearch.trim()}" as a custom skill.
+          </p>
         )}
+
+        <button
+          className="btn btn-primary"
+          style={{ width: '100%', marginTop: 8 }}
+          onClick={handleAddSkills}
+          disabled={!!addingSkillId || (selectedSkills.length === 0 && skillSearch.trim().length < 2)}
+        >
+          {addingSkillId ? '⏳ Adding...' : `＋ Add ${selectedSkills.length > 0 ? selectedSkills.length + (skillSearch.trim().length >= 2 ? 1 : 0) : 1} Skill(s)`}
+        </button>
 
       </Modal>
 
