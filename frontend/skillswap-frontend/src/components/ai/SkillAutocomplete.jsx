@@ -126,7 +126,6 @@ export function SkillAutocomplete({
 
   const handleSelect = (skill) => {
     onSelect?.(skill);
-    onChange?.(skill.name);
     setOpen(false);
     setActiveIndex(-1);
     setSuggestions([]);

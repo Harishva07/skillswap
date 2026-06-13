@@ -685,10 +685,10 @@ export const Profile = () => {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
             {selectedSkills.map((s, i) => (
               <span key={i} style={{
-                background: 'var(--primary-100)', color: 'var(--primary-700)',
+                background: 'var(--bg-secondary)', color: 'var(--text-primary)',
                 padding: '4px 10px', borderRadius: 16, fontSize: 13, fontWeight: 500,
                 display: 'flex', alignItems: 'center', gap: 6,
-                border: '1px solid var(--primary-200)'
+                border: '1px solid var(--border)'
               }}>
                 {s.name}
                 <button 
