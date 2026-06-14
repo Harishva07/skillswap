@@ -2184,14 +2184,46 @@ tr:hover td { background: var(--bg-secondary); }
   .sidebar.open {
     transform: translateX(0);
     box-shadow: var(--shadow-xl);
+    width: 260px;
   }
 
   .topbar {
     padding: 0 16px;
   }
+  
+  .topbar-subtitle {
+    display: none;
+  }
+  
+  .topbar-title {
+    font-size: 16px;
+  }
+  
+  .topbar-left {
+    gap: 10px;
+  }
+  
+  .topbar-right {
+    gap: 6px;
+  }
 
   .page-content {
     padding: 16px;
+  }
+  
+  .card-header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .tabs {
+    flex-wrap: wrap;
+  }
+  
+  .tab-btn {
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
   }
 
   /* Grid collapsing */
